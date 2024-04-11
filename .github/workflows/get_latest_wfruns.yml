@@ -6,7 +6,7 @@ on:
       org_name:
         description: 'Organization name'
         required: true
-        default: ${{ github.event.repository.owner.login != '' && github.event.repository.owner.login != null && github.event.repository.owner.login || null }}
+        default: ${{ coalesce(github.event.repository.owner.login, null) }}
       workflow_file:
         description: 'Workflow file name'
         required: true
