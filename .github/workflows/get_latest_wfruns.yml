@@ -1,11 +1,12 @@
 name: Get Latest Workflow Runs as Output
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
+      org_name:
+        description: 'Organization name (optional)'
+        required: true
+        default: '${{ github.repository_owner }}'
       workflow_file:
         description: 'Workflow file name'
         required: true
@@ -33,16 +34,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install requests
 
-    - name: Fetch organization name
-      id: org_name
-      run: |
-        echo "::set-output name=org_name::${{ github.repository_owner }}"
-
     - name: Run Python script
       id: run_python_script
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      run: python your_script.py -o "${{ steps.org_name.outputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
+      run: python get-latest-workflow-runs.py -o "${{ github.event.inputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
 
     - name: Upload CSV artifact
       if: success()
