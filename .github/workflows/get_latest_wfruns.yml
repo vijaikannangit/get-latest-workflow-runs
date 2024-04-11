@@ -3,10 +3,6 @@ name: Get Latest Workflow Runs as Output
 on:
   workflow_dispatch:
     inputs:
-      org_name:
-        description: 'Organization name'
-        required: true
-        default: ${{ coalesce(github.event.repository.owner.login, null) }}
       workflow_file:
         description: 'Workflow file name'
         required: true
@@ -21,9 +17,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -34,14 +27,33 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
+      - name: Fetch organization name
+        id: fetch_org_name
+        run: |
+          org_name=$(echo "${{ github.event.repository.owner.login }}")
+          if [ -z "$org_name" ]; then
+            echo "Organization name not found."
+            exit 1
+          fi
+          echo "::set-output name=org_name::$org_name"
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Run Python script
+        if: steps.fetch_org_name.outputs.org_name != ''
         id: run_python_script
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: python get-latest-workflow-runs.py -o "${{ github.event.inputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
+        run: |
+          python get-latest-workflow-runs.py -o "${{ steps.fetch_org_name.outputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
+
+      - name: Check organization name
+        if: steps.fetch_org_name.outputs.org_name == ''
+        run: echo "Error: Organization name not found."
 
       - name: Upload CSV artifact
-        if: success()
+        if: success() && steps.fetch_org_name.outputs.org_name != ''
         uses: actions/upload-artifact@v2
         with:
           name: output-csv
