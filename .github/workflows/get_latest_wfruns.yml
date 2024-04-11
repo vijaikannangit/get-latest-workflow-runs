@@ -1,0 +1,52 @@
+name: Get Latest Workflow Runs as Output
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      workflow_file:
+        description: 'Workflow file name'
+        required: true
+      output_file:
+        description: 'Output file name'
+        required: true
+        default: 'output.csv'
+        type: string
+
+jobs:
+  get_latest_runs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Fetch organization name
+      id: org_name
+      run: |
+        echo "::set-output name=org_name::${{ github.repository_owner }}"
+
+    - name: Run Python script
+      id: run_python_script
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      run: python your_script.py -o "${{ steps.org_name.outputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
+
+    - name: Upload CSV artifact
+      if: success()
+      uses: actions/upload-artifact@v2
+      with:
+        name: output-csv
+        path: ${{ github.event.inputs.output_file }}

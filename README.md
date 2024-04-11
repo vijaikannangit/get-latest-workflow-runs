@@ -34,6 +34,7 @@ Execute the script
 #### Example
 ```
     python get-latest-workflow-runs.py --org my-org --workflow code-ql.yml
+    
 ```
 To run with debug mode
 ```

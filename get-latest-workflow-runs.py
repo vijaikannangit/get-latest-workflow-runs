@@ -3,7 +3,7 @@ import argparse
 import os
 import csv
 
-parser = argparse.ArgumentParser(prog='Get Latest Workflow Runs',0
+parser = argparse.ArgumentParser(prog='Get Latest Workflow Runs',
                                  description='Gets the latest workflow runs for the repositories in the organization for the given workflow id')
 parser.add_argument(
     '-o',
