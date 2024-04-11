@@ -6,7 +6,7 @@ on:
       org_name:
         description: 'Organization name'
         required: true
-        default: ${{ github.repository_owner }}
+        default: ${{ if(ne(github.event.repository.owner.login, null), github.event.repository.owner.login, '') }}
       workflow_file:
         description: 'Workflow file name'
         required: true
