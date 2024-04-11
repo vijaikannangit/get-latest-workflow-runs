@@ -48,10 +48,7 @@ jobs:
         run: |
           python get-latest-workflow-runs.py -o "${{ steps.fetch_org_name.outputs.org_name }}" -w "${{ github.event.inputs.workflow_file }}" -f "${{ github.event.inputs.output_file }}"
 
-      - name: Check organization name
-        if: steps.fetch_org_name.outputs.org_name == ''
-        run: echo "Error: Organization name not found."
-
+  
       - name: Upload CSV artifact
         if: success() && steps.fetch_org_name.outputs.org_name != ''
         uses: actions/upload-artifact@v2
